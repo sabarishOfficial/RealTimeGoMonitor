@@ -2,6 +2,8 @@
 
 This GoLang project provides a simple and real-time monitoring solution for your server's RAM and CPU usage. The application updates the information every 2 seconds, providing a live view without the need for manual page refresh.
 
+<img align="right" alt="Coding" src="https://github.com/sabarishOfficial/RealTimeGoMonitor/blob/main/view_image/Screenshot%202023-12-11%20at%206.50.41%20PM.png">
+
 ## Features
 
 - **Real-time Monitoring:** The application continuously monitors your server's RAM and CPU usage, providing up-to-date information.
