@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>System Monitoring</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <style>
+        /*.plotly-graph-div {*/
+        /*    margin: auto;*/
+        /*    width: 50%;*/
+        /*    background-color: rgba(151, 128, 128, 0.688);*/
+        /*    padding: 20px;*/
+        /*}*/
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: rgba(151, 128, 128, 0.688);
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        .plotly-graph-div {
+            margin: auto;
+            width: 100%;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .alert {
+            display: none;
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>System Monitoring</h1>
+        <div id="cpu-gauge"></div>
+        <div id="mem-gauge"></div>
+        <div id="message" class="alert alert-danger"></div>
+    </div>
+    <script>
+        function updateMetrics() {
+            $.ajax({
+                url: "/metrics",
+                type: "GET",
+                dataType: "json",
+                success: function (data) {
+                    updateGauge('cpu-gauge', data.CpuMetrics);
+                    updateGauge('mem-gauge', data.MemoryMetrics);
+                    updateMessage(data.Message);
+                },
+                error: function (error) {
+                    console.error("Error fetching metrics:", error);
+                }
+            });
+        }
+
+        function updateGauge(elementId, value) {
+            var gauge = {
+                type: "indicator",
+                mode: "gauge+number",
+                value: value,
+                gauge: {
+                    axis: { range: [null, 100] },
+                    bar: { color: "#1f77b4" },
+                    bgcolor: "white",
+                    borderwidth: 2,
+                    bordercolor: "#ccc",
+                    steps: [
+                        { range: [0, 50], color: "#d9f0a3" },
+                        { range: [50, 85], color: "#ffeb84" },
+                        { range: [85, 100], color: "#ff5f5f" }
+                    ],
+                    threshold: {
+                        line: { color: "red", width: 4 },
+                        thickness: 0.75,
+                        value: value
+                    }
+                }
+            };
+
+            var layout = { title: elementId === 'cpu-gauge' ? "CPU Utilization" : "Memory Utilization" };
+
+            Plotly.react(elementId, [gauge], layout);
+        }
+
+        function updateMessage(message) {
+            var messageElement = $('#message');
+            if (message) {
+                messageElement.text(message).show();
+            } else {
+                messageElement.hide();
+            }
+        }
+
+        $(document).ready(function () {
+            // Initial update
+            updateMetrics();
+
+            // Periodic update every 5 seconds
+            setInterval(function () {
+                updateMetrics();
+            }, 2000);
+        });
+    </script>
+</body>
+</html>
